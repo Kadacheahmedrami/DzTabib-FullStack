@@ -6,7 +6,7 @@
       "use": "@vercel/next"
     },
     {
-      "src": "backend/app.js",
+      "src": "backend/package.json",
       "use": "@vercel/node"
     }
   ],
@@ -15,10 +15,7 @@
       "src": "/back/(.*)",
       "dest": "/backend/app.js"
     },
-    {
-      "src": "/back/(.*)",
-      "dest": "/backend/app.js"
-    },
+
     {
       "src": "/(.*)",
       "dest": "/frontend/$1"
