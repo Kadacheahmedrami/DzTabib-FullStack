@@ -1,0 +1,35 @@
+
+html ,body{
+  height: 100vh;
+
+ width: 100%;
+  background-color: transparent;
+display: flex;
+} 
+
+
+.left{
+    width: 60%;
+    height: 100vh;
+    background-color: #0F70DA;
+
+}
+
+
+.sac{
+height: 100vh;
+overflow-y: scroll;
+
+width: 100%;
+padding: 10Px;
+}
+
+
+@media (max-width: 768px) {
+  .left{
+    display: none;
+  }
+  .pad{
+    padding: 15px;
+}
+  }

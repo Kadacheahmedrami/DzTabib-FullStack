@@ -1,0 +1,50 @@
+/* Menu List Styling */
+.menu-list {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-right: auto;
+    list-style: none;
+    padding: 0;
+  }
+  
+  /* Menu Item Styling */
+  .menu-item {
+    margin: 0 1.5rem; /* Adjust spacing */
+    white-space: nowrap;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  
+  /* Link Styling */
+  .menu-link {
+    font-size: 1.25rem; /* Adjust size */
+    color: var(--main-color); /* Define --main-color in your CSS variables */
+    text-decoration: none;
+    position: relative; /* Needed for the ::after pseudo-element */
+    display: inline-block; /* Required for proper sizing */
+    transition: color 0.3s ease;
+  }
+  
+  /* Hover Effect on Link */
+  .menu-link:hover {
+    color: blue; /* Define --orange-color in your CSS variables */
+  }
+  
+  /* Underline Effect */
+  .menu-link::after {
+    content: "";
+    position: absolute;
+    bottom: -3px; /* Adjust spacing below text */
+    left: 0;
+    width: 0;
+    height: 2px; /* Adjust thickness */
+    background-color: blue; /* Define --primary-color in your CSS variables */
+    transition: width 0.3s ease;
+  }
+  
+  /* Hover Effect on Underline */
+  .menu-link:hover::after {
+    width: 100%; /* Expand underline */
+  }
+  
