@@ -1,130 +1,84 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-
- 
-
-
+import { jwtVerify } from 'jose';  // Import jwtVerify from jose
 
 export async function middleware(request: NextRequest) {
-  // console.time('middlewareExecutionTime');
+  // Get the 'azouaou' cookie directly
+  const tokenCookie = request.cookies.get('azouaou');
 
+  // Default user if no token
+  let user = null;
 
+  if (tokenCookie) {
+    const token = tokenCookie.value;
+
+    try {
+      // Verify and decode the JWT token using the secret from your environment variables
+      const secret = new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET as string);
+      const { payload } = await jwtVerify(token, secret);
+
+      // Now safely assign the user data
+      user = payload as { role: string; id: string; email: string }; // Update as needed based on your token's structure
+      console.log('Decoded JWT:', payload);
+    } catch (error) {
+      // Token verification failed
+      console.error('Token verification failed:', error);
+    }
+  } else {
+    console.log('No "azouaou" cookie found');
+  }
+
+  // Clone the request URL to modify the pathname for redirection
   const url = request.nextUrl.clone();
 
-
-  if (url.pathname.startsWith('/pages/api')) {
+  // Skip middleware for API routes
+  if (url.pathname.startsWith('/api')) {
     return NextResponse.next(); // Skip middleware for API routes
   }
 
-
-   const allCookies = request.cookies.getAll()
-
-  // Log all cookies (remove in production)
-  console.log('All Cookies:', allCookies)
-
-  
-  // // console.log( request.cookies.getall())
-  // console.log(token)
-  // if (token) {
-  //   try {
-  //     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-  //     // Access token contents
-  //     console.log({
-  //       userId: decoded.id,
-  //       email: decoded.email,
-  //       name: decoded.name,
-  //       role: decoded.role
-  //     });
-
-  //     // You can use these decoded values for route protection
-  //     if (decoded.role === 'patient') {
-  //       // Patient-specific logic
-  //     }
-
-  //   } catch (error) {
-  //     // Token invalid or expired
-  //     console.error('Token verification failed');
-  //     // Redirect to login or handle invalid token
-  //   }
-  // }
- 
-  
-  
-  if (url.pathname === '/pages/login' || url.pathname === '/pages/signup') {
-    if(url.pathname === '/pages/login')
-    { url.pathname = '/pages/auth/login';}
-      else{
-        url.pathname = '/pages/auth/signup';
+  // Redirection logic based on user role and route access
+  if (url.pathname.startsWith('/pages/dashDoc')) {
+    // If route starts with /pages/dashDoc/ and user is not a doctor
+    if (!user || user.role !== 'doctor') {
+      url.pathname = '/pages/auth/login'; // Redirect non-doctors to login
+      return NextResponse.redirect(url);
     }
-    // Redirect to '/auth/login'
+    url.pathname = '/pages/dashDoc/notification'; // Redirect non-doctors to login
     return NextResponse.redirect(url);
+
+  } else if (url.pathname.startsWith('/pages/dashPat')) {
+    // If route starts with /pages/dashPat/ and user is not a patient
+    if (!user || user.role !== 'patient') {
+      url.pathname = '/pages/auth/login'; // Redirect non-patients to login
+      return NextResponse.redirect(url);
+    }
+  
+  } else if (url.pathname === '/pages/login' || url.pathname === '/pages/signup') {
+    // If user is logged in, redirect to dashboard
+    if (user) {
+      if (user.role === 'doctor') {
+        url.pathname = '/pages/dashDoc/notification'; // Redirect doctor to their dashboard
+      } else if (user.role === 'patient') {
+        url.pathname = '/pages/dashPat/search'; // Redirect patient to their dashboard
+      } else {
+        url.pathname = '/pages/auth/login'; // Default fallback if role is not recognized
+      }
+      return NextResponse.redirect(url);
+    }
   }
 
-
-
-
-  const userType = 'patient'
-
-    if (url.pathname === '/pages/Dashboard' || url.pathname === '/Dashboard' || url.pathname == "/pages/Dashboard-Doc") {
-      if(url.pathname == "/pages/Dashboard-Doc")
-      {
-        url.pathname = '/pages/dashDoc/notification';
-      }
-      else
-      {
-        if(userType == 'patient')
-          {
-            url.pathname = '/pages/dashPat/search';
-          }else{
-            if( userType == 'doctor')
-            { url.pathname = '/pages/dashDoc/notification';}
-              else{
-                url.pathname = '/pages/auth/login ';
-              }
-          }
-      }
-  
-  
-      return NextResponse.redirect(url);
-    }
-
-
-
-    if (url.pathname === '/pages/dashDoc' ) {
-      url.pathname = '/pages/dashDoc/notification'; // Redirect to '/dash/notification'
-      return NextResponse.redirect(url);
-    }
-
-    if (url.pathname === '/pages/dashPat') {
-      url.pathname = '/pages/dashPat/search'; // Redirect to '/dash/search'
-      return NextResponse.redirect(url);
-    }
-
-
-  
-
-
-
-
-  // console.timeEnd('middlewareExecutionTime');
-
-
-  return NextResponse.next(); // Allow other routes to proceed as normal
-
-
+  // Allow other routes to proceed as normal
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    '/',
+    '/', 
     '/notification', 
     '/appointments', 
     '/historique', 
     '/profile', 
     '/search', 
-    '/chat',
-    
+    '/chat', 
     '/pages/:path*'
   ]
-}
+};

@@ -1,8 +1,6 @@
 "use client";
 import { LiaCertificateSolid } from "react-icons/lia";
-import { Tabs, 
-  // TabsContent,
-   TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TfiAlarmClock } from "react-icons/tfi";
 import { LuMessageCircleMore } from "react-icons/lu";
 import { IoLocationSharp } from "react-icons/io5";
@@ -11,7 +9,13 @@ import { FaStar } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import Image from 'next/image';
 import { useParams } from "next/navigation";
-import LocationMap from "@/components/patientDash/map";
+import dynamic from 'next/dynamic'; // <-- Add this
+
+// Dynamically import LocationMap with SSR disabled
+const LocationMap = dynamic(
+  () => import('@/components/patientDash/map'), 
+  { ssr: false } // <-- This ensures it only loads in the browser
+);
 
 interface DoctorDetails {
   image: string;
@@ -26,7 +30,6 @@ interface DoctorDetails {
 }
 
 export default function Page() {
-  // Get the path name
   const { doc_details } = useParams();
   const [docDetails, setDocDetails] = useState<DoctorDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,34 +137,19 @@ export default function Page() {
                   <GrCertificate color="black" size={40} />
                 </TabsTrigger>
               </TabsList>
-              {/* <TabsContent value="location">{docDetails.location}</TabsContent>
-              <TabsContent value="crt">{docDetails.certificate}</TabsContent> */}
             </Tabs>
           </div>
 
-          {/* Certificate or location image */}
-          {/* <div className='border p-4'>
-            {activeTab === "location" ? (
-              <Image src={docDetails.adressImage} alt="location" className="bg-green-200 p-8" width={800} height={1200} />
-            ) : (
-              <Image src={docDetails.certificate} alt="certificate" className="bg-red-200 p-8" width={800} height={1200} />
-            )}
-          </div> */}
-        <div className='w-[600px] h-[300px] m-4'>
-        <LocationMap 
-          latitude={40.7128} 
-          longitude={-74.0060} 
-          address="New York City"  
-          
-        />
-        </div>
-        
-
-
+          {/* Location Map */}
+          <div className='w-[600px] h-[300px] m-4'>
+            <LocationMap 
+              latitude={40.7128} 
+              longitude={-74.0060} 
+              address="New York City"  
+            />
+          </div>
         </>
       )}
-
-   
     </div>
   );
 }
